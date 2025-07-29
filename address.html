@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Address | Premium Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #2874f0;
+            --secondary: #fb641b;
+            --accent: #ff9f00;
+            --dark: #212121;
+            --light: #f1f3f6;
+            --white: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        .checkout-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .checkout-header {
+            width: 100%;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkout-logo {
+            height: 40px;
+            margin-right: 15px;
+        }
+        
+        .checkout-steps {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            color: #878787;
+        }
+        
+        .step.active {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 12px;
+        }
+        
+        .step.active .step-number {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .step-separator {
+            margin: 0 15px;
+            color: #c2c2c2;
+        }
+        
+        .address-container {
+            flex: 2;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(40, 116, 240, 0.1);
+        }
+        
+        .name-fields {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .name-fields .form-group {
+            flex: 1;
+        }
+        
+        .save-address {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .save-address input {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .continue-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        
+        .continue-btn:hover {
+            background-color: #e55a14;
+        }
+        
+        .summary-container {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            align-self: flex-start;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .summary-label {
+            color: #878787;
+        }
+        
+        .summary-value {
+            font-weight: 500;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #f0f0f0;
+            margin: 20px 0;
+        }
+        
+        .total-amount {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .product-preview {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .product-preview-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border: 1px solid #f0f0f0;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        
+        .product-preview-details {
+            flex: 1;
+        }
+        
+        .product-preview-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .product-preview-price {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        @media (max-width: 768px) {
+            .address-container, .summary-container {
+                flex: 100%;
+            }
+            
+            .name-fields {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <img id="checkoutLogo" class="checkout-logo" src="" alt="Logo">
+            <div class="checkout-steps">
+                <div class="step active">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Delivery Address</div>
+                </div>
+                <div class="step-separator"><i class="fas fa-chevron-right"></i></div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Order Summary</div>
+                </div>
+                <div class="step-separator"><i class="fas fa-chevron-right"></i></div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Payment</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="address-container">
+            <h2 class="section-title">Delivery Address</h2>
+            
+            <div class="name-fields">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Full Address (House No, Building, Street, Area)</label>
+                <textarea id="address" rows="3" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="landmark">Landmark (Optional)</label>
+                <input type="text" id="landmark">
+            </div>
+            
+            <div class="name-fields">
+                <div class="form-group">
+                    <label for="pincode">Pincode</label>
+                    <input type="text" id="pincode" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="state">State</label>
+                <select id="state" required>
+                    <option value="">Select State</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                    <option value="West Bengal">West Bengal</option>
+                </select>
+            </div>
+            
+            <div class="save-address">
+                <input type="checkbox" id="saveAddress">
+                <label for="saveAddress">Save this address for future use</label>
+            </div>
+            
+            <button class="continue-btn" onclick="submitAddress()">CONTINUE</button>
+        </div>
+        
+        <div class="summary-container">
+            <h3 class="section-title">Order Summary</h3>
+            
+            <div class="product-preview">
+                <img id="previewImage" class="product-preview-image" src="" alt="Product">
+                <div class="product-preview-details">
+                    <div id="previewTitle" class="product-preview-title"></div>
+                    <div id="previewPrice" class="product-preview-price"></div>
+                </div>
+            </div>
+            
+            <div class="summary-item">
+                <span class="summary-label">Price</span>
+                <span id="summaryPrice" class="summary-value"></span>
+            </div>
+            
+            <div class="summary-item">
+                <span class="summary-label">Delivery</span>
+                <span class="summary-value">FREE</span>
+            </div>
+            
+            <div class="summary-item">
+                <span class="summary-label">Discount</span>
+                <span class="summary-value">-₹4,800</span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="summary-item">
+                <span class="summary-label">Total Amount</span>
+                <span id="totalAmount" class="summary-value total-amount"></span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div style="color: #388e3c; font-size: 14px; margin-top: 20px;">
+                <i class="fas fa-shield-alt" style="margin-right: 8px;"></i>
+                Safe and Secure Payments. Easy returns.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGHhx35Rd_wl422i6dXARwVLCmhjp11Zg",
+            authDomain: "bgmi-tournament-panel.firebaseapp.com",
+            databaseURL: "https://bgmi-tournament-panel-default-rtdb.firebaseio.com",
+            projectId: "bgmi-tournament-panel",
+            storageBucket: "bgmi-tournament-panel.appspot.com",
+            messagingSenderId: "531853804076",
+            appId: "1:531853804076:web:0be88f13b7c721bc354789"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Fetch admin settings for logo
+        database.ref('adminSettings').once('value').then((snapshot) => {
+            const settings = snapshot.val();
+            if (settings && settings.logoUrl) {
+                document.getElementById('checkoutLogo').src = settings.logoUrl;
+            }
+        });
+
+        // Fetch product details for summary
+        database.ref('product').once('value').then((snapshot) => {
+            const product = snapshot.val();
+            if (product) {
+                document.getElementById('previewTitle').textContent = product.title || 'Product';
+                document.getElementById('previewPrice').textContent = product.price ? `₹${product.price}` : '₹0';
+                document.getElementById('previewImage').src = product.imageUrl || 'https://via.placeholder.com/80';
+                
+                if (product.price) {
+                    document.getElementById('summaryPrice').textContent = `₹${product.price}`;
+                    const originalPrice = Math.round(product.price / 0.7);
+                    const discount = originalPrice - product.price;
+                    document.querySelector('.summary-item:nth-child(3) .summary-value').textContent = `-₹${discount}`;
+                    document.getElementById('totalAmount').textContent = `₹${product.price}`;
+                }
+            }
+        });
+
+        function submitAddress() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const address = document.getElementById('address').value;
+            const landmark = document.getElementById('landmark').value;
+            const pincode = document.getElementById('pincode').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const saveAddress = document.getElementById('saveAddress').checked;
+
+            if (!firstName || !lastName || !phone || !address || !pincode || !city || !state) {
+                alert('Please fill all required fields');
+                return;
+            }
+
+            // Save address to Firebase
+            const orderRef = database.ref('orders').push();
+            orderRef.set({
+                firstName,
+                lastName,
+                phone,
+                email,
+                address,
+                landmark,
+                pincode,
+                city,
+                state,
+                saveAddress,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                status: 'pending'
+            }).then(() => {
+                // Store order ID in localStorage for bill.html
+                localStorage.setItem('currentOrderId', orderRef.key);
+                window.location.href = 'bill.html';
+            }).catch((error) => {
+                console.error('Error saving address:', error);
+                alert('Error saving your address. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>

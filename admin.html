@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2874f0;
+            --secondary: #fb641b;
+            --accent: #ff9f00;
+            --dark: #212121;
+            --light: #f1f3f6;
+            --white: #ffffff;
+            --success: #388e3c;
+            --danger: #e53935;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background-color: rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary);
+        }
+        
+        .menu-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Top Navigation */
+        .top-nav {
+            background-color: var(--white);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--light);
+            border-radius: 4px;
+            padding: 8px 15px;
+            width: 400px;
+        }
+        
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 5px 10px;
+            width: 100%;
+            outline: none;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+        
+        /* Content Area */
+        .content-area {
+            padding: 25px;
+            flex: 1;
+        }
+        
+        .dashboard-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-change.up {
+            color: var(--success);
+        }
+        
+        .stat-change.down {
+            color: var(--danger);
+        }
+        
+        /* Charts */
+        .chart-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        /* Orders Table */
+        .orders-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        
+        .status-confirmed {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .status-shipped {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status-delivered {
+            background-color: #f1f8e9;
+            color: #689f38;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        .btn-view {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        /* Settings Section */
+        .settings-section {
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(40, 116, 240, 0.1);
+        }
+        
+        .btn-save {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* Login Container */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f7fa;
+        }
+        
+        .login-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+        }
+        
+        .login-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .login-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        @media (max-width: 1200px) {
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+                overflow: hidden;
+            }
+            
+            .sidebar-title, .menu-text {
+                display: none;
+            }
+            
+            .menu-item {
+                justify-content: center;
+            }
+            
+            .menu-icon {
+                margin-right: 0;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2 class="login-title">Admin Login</h2>
+            <input type="password" id="adminPassword" class="login-input" placeholder="Enter admin password">
+            <button onclick="checkAdminPassword()" class="login-btn">LOGIN</button>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminPanel" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img id="adminLogo" class="sidebar-logo" src="" alt="Logo">
+                <div class="sidebar-title">Admin Panel</div>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" onclick="showSection('dashboard')">
+                    <div class="menu-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div class="menu-text">Dashboard</div>
+                </div>
+                <div class="menu-item" onclick="showSection('orders')">
+                    <div class="menu-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="menu-text">Orders</div>
+                </div>
+                <div class="menu-item" onclick="showSection('products')">
+                    <div class="menu-icon"><i class="fas fa-box-open"></i></div>
+                    <div class="menu-text">Products</div>
+                </div>
+                <div class="menu-item" onclick="showSection('settings')">
+                    <div class="menu-icon"><i class="fas fa-cog"></i></div>
+                    <div class="menu-text">Settings</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Navigation -->
+            <div class="top-nav">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="user-profile">
+                    <div>Admin</div>
+                    <div class="user-avatar">A</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <div id="dashboardSection">
+                    <h1 class="dashboard-title">Dashboard Overview</h1>
+                    
+                    <!-- Stats Cards -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-title">Total Sales</div>
+                            <div class="stat-value" id="totalSales">₹0</div>
+                            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 12% from last month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Total Orders</div>
+                            <div class="stat-value" id="totalOrders">0</div>
+                            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 8% from last month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">New Customers</div>
+                            <div class="stat-value" id="totalCustomers">0</div>
+                            <div class="stat-change down"><i class="fas fa-arrow-down"></i> 3% from last month</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Conversion Rate</div>
+                            <div class="stat-value" id="conversionRate">0%</div>
+                            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 2% from last month</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="chart-container">
+                        <div class="chart-card">
+                            <div class="chart-title">Sales Analytics</div>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-title">Revenue Sources</div>
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    <div class="orders-card">
+                        <div class="chart-title">Recent Orders</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrders">
+                                    <!-- Recent orders will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Orders Section -->
+                <div id="ordersSection" class="settings-section">
+                    <h1 class="dashboard-title">Order Management</h1>
+                    <div class="orders-card">
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Phone</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allOrders">
+                                    <!-- All orders will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Section -->
+                <div id="productsSection" class="settings-section">
+                    <h1 class="dashboard-title">Product Management</h1>
+                    <div class="orders-card">
+                        <div class="form-group">
+                            <label class="form-label">Product Title</label>
+                            <input type="text" id="productTitle" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product Price (₹)</label>
+                            <input type="number" id="productPrice" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product Image URL</label>
+                            <input type="text" id="productImageUrl" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Product Description</label>
+                            <textarea id="productDescription" class="form-control" rows="4"></textarea>
+                        </div>
+                        <button onclick="saveProduct()" class="btn-save">SAVE PRODUCT</button>
+                    </div>
+                </div>
+                
+                <!-- Settings Section -->
+                <div id="settingsSection" class="settings-section">
+                    <h1 class="dashboard-title">Store Settings</h1>
+                    <div class="orders-card">
+                        <div class="form-group">
+                            <label class="form-label">Store Logo URL</label>
+                            <input type="text" id="logoUrl" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Store Name</label>
+                            <input type="text" id="storeName" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Header Text</label>
+                            <input type="text" id="headerText" class="form-control">
+                        </div>
+                        <div class
