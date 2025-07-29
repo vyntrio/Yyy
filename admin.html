@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Admin Dashboard</title>
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2874f0;
@@ -18,6 +17,7 @@
             --white: #ffffff;
             --success: #388e3c;
             --danger: #e53935;
+            --warning: #ffa000;
         }
         
         * {
@@ -28,221 +28,84 @@
         }
         
         body {
-            display: flex;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
             background-color: #f5f7fa;
-        }
-        
-        /* Sidebar Styles */
-        .sidebar {
-            width: 250px;
-            background-color: var(--dark);
-            color: white;
-            transition: all 0.3s;
-        }
-        
-        .sidebar-header {
             padding: 20px;
-            background-color: rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
         }
         
-        .sidebar-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-        
-        .menu-item {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .menu-item:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        
-        .menu-item.active {
-            background-color: var(--primary);
-        }
-        
-        .menu-icon {
-            margin-right: 10px;
-            font-size: 18px;
-        }
-        
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Top Navigation */
-        .top-nav {
-            background-color: var(--white);
-            padding: 15px 25px;
+        .admin-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         
-        .search-bar {
+        .admin-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .admin-tabs {
             display: flex;
-            align-items: center;
-            background-color: var(--light);
-            border-radius: 4px;
-            padding: 8px 15px;
-            width: 400px;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
         }
         
-        .search-bar input {
+        .tab-btn {
+            padding: 8px 16px;
+            background: none;
             border: none;
-            background: transparent;
-            padding: 5px 10px;
-            width: 100%;
-            outline: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #555;
+            border-radius: 4px;
         }
         
-        .user-profile {
-            display: flex;
-            align-items: center;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .tab-btn.active {
             background-color: var(--primary);
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 15px;
-            font-weight: 600;
         }
         
-        /* Content Area */
-        .content-area {
-            padding: 25px;
-            flex: 1;
+        .tab-content {
+            display: none;
         }
         
-        .dashboard-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: var(--dark);
+        .tab-content.active {
+            display: block;
         }
         
-        /* Stats Cards */
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .stat-title {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .stat-change {
-            font-size: 12px;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .stat-change.up {
-            color: var(--success);
-        }
-        
-        .stat-change.down {
-            color: var(--danger);
-        }
-        
-        /* Charts */
-        .chart-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .chart-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .chart-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--dark);
-        }
-        
-        /* Orders Table */
-        .orders-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .table-responsive {
-            overflow-x: auto;
-        }
-        
-        table {
+        .orders-table {
             width: 100%;
             border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
         
-        th, td {
+        .orders-table th, .orders-table td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #eee;
         }
         
-        th {
+        .orders-table th {
             background-color: #f9f9f9;
             font-weight: 600;
             color: #555;
         }
         
-        tr:hover {
+        .orders-table tr:hover {
             background-color: #f5f5f5;
         }
         
@@ -251,6 +114,7 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
+            display: inline-block;
         }
         
         .status-pending {
@@ -263,23 +127,24 @@
             color: var(--success);
         }
         
+        .status-cancelled {
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+        
         .status-shipped {
             background-color: #e3f2fd;
             color: #1976d2;
         }
         
-        .status-delivered {
-            background-color: #f1f8e9;
-            color: #689f38;
-        }
-        
         .action-btn {
-            padding: 5px 10px;
+            padding: 6px 12px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
             margin-right: 5px;
+            transition: all 0.3s;
         }
         
         .btn-view {
@@ -287,8 +152,13 @@
             color: white;
         }
         
-        .btn-edit {
-            background-color: var(--accent);
+        .btn-confirm {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-cancel {
+            background-color: var(--danger);
             color: white;
         }
         
@@ -297,9 +167,80 @@
             color: white;
         }
         
-        /* Settings Section */
-        .settings-section {
+        .btn-edit {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        /* Modal Styles */
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 25px;
+            border-radius: 8px;
+            width: 60%;
+            max-width: 700px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: #555;
+        }
+        
+        .order-details-container {
+            margin-top: 20px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            width: 150px;
+            color: #555;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* Settings Form */
+        .settings-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .form-group {
@@ -335,120 +276,131 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 16px;
         }
         
-        /* Login Container */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f7fa;
-        }
-        
-        .login-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            padding: 40px;
-            width: 400px;
-            text-align: center;
-        }
-        
-        .login-logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            background-color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 30px;
-        }
-        
-        .login-title {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: var(--dark);
-        }
-        
-        .login-input {
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 20px;
+        .product-image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 16px;
-        }
-        
-        .login-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        @media (max-width: 1200px) {
-            .stats-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .chart-container {
-                grid-template-columns: 1fr;
-            }
+            display: block;
         }
         
         @media (max-width: 768px) {
-            .sidebar {
-                width: 80px;
-                overflow: hidden;
+            .modal-content {
+                width: 90%;
+                margin: 10% auto;
             }
             
-            .sidebar-title, .menu-text {
-                display: none;
+            .detail-row {
+                flex-direction: column;
             }
             
-            .menu-item {
-                justify-content: center;
-            }
-            
-            .menu-icon {
-                margin-right: 0;
-            }
-            
-            .stats-container {
-                grid-template-columns: 1fr;
+            .detail-label {
+                width: 100%;
+                margin-bottom: 5px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginContainer" class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
-                <i class="fas fa-lock"></i>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">Admin Dashboard</h1>
+        </div>
+        
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="openTab('orders')">Orders</button>
+            <button class="tab-btn" onclick="openTab('products')">Products</button>
+            <button class="tab-btn" onclick="openTab('settings')">Store Settings</button>
+        </div>
+        
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="tab-content active">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersList">
+                    <!-- Orders will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Products Tab -->
+        <div id="productsTab" class="tab-content">
+            <div class="settings-form">
+                <h2 class="section-title">Product Management</h2>
+                <div class="form-group">
+                    <label class="form-label">Product Title</label>
+                    <input type="text" id="productTitle" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Product Price (₹)</label>
+                    <input type="number" id="productPrice" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Product Image URL</label>
+                    <input type="text" id="productImageUrl" class="form-control" onchange="updateProductPreview()">
+                    <img id="productImagePreview" class="product-image-preview" src="" alt="Product Preview">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Product Description</label>
+                    <textarea id="productDescription" class="form-control" rows="4"></textarea>
+                </div>
+                <button onclick="saveProduct()" class="btn-save">SAVE PRODUCT</button>
             </div>
-            <h2 class="login-title">Admin Login</h2>
-            <input type="password" id="adminPassword" class="login-input" placeholder="Enter admin password">
-            <button id="loginButton" class="login-btn">LOGIN</button>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div id="settingsTab" class="tab-content">
+            <div class="settings-form">
+                <h2 class="section-title">Store Settings</h2>
+                <div class="form-group">
+                    <label class="form-label">Store Logo URL</label>
+                    <input type="text" id="logoUrl" class="form-control" onchange="updateLogoPreview()">
+                    <img id="logoPreview" class="product-image-preview" src="" alt="Logo Preview">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Store Name</label>
+                    <input type="text" id="storeName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Header Text</label>
+                    <input type="text" id="headerText" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Theme Color</label>
+                    <input type="color" id="themeColor" class="form-control" value="#2874f0">
+                </div>
+                <button onclick="saveSettings()" class="btn-save">SAVE SETTINGS</button>
+            </div>
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
-    <div id="adminPanel" style="display: none;">
-        <!-- Rest of your admin panel HTML remains exactly the same -->
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2>Order Details</h2>
+            <div id="orderDetailsContent" class="order-details-container">
+                <!-- Order details will be populated here -->
+            </div>
+        </div>
     </div>
 
     <script>
-        // Firebase configuration (VERIFY THESE VALUES IN YOUR FIREBASE CONSOLE)
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCGHhx35Rd_wl422i6dXARwVLCmhjp11Zg",
             authDomain: "bgmi-tournament-panel.firebaseapp.com",
@@ -460,166 +412,144 @@
         };
 
         // Initialize Firebase
-        let firebaseApp;
-        try {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-            alert("Failed to initialize Firebase. Check console for details.");
-        }
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        const ADMIN_PASSWORD = "722101"; // Case-sensitive password
-
-        function checkAdminPassword() {
-            const password = document.getElementById('adminPassword').value.trim();
-            console.log("Login attempt with password:", password); // Debug log
-            
-            if (password === ADMIN_PASSWORD) {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'flex';
-                
-                // Check if Firebase initialized properly
-                if (!firebaseApp) {
-                    alert("Error: Firebase not initialized. Check console for details.");
-                    return;
-                }
-                
-                loadAdminData();
-                initializeCharts();
-            } else {
-                alert('Incorrect password. Please try again.');
-                document.getElementById('adminPassword').value = '';
-                document.getElementById('adminPassword').focus();
-            }
-        }
-
-        // Modern event listener binding
+        // Load data when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM fully loaded"); // Debug log
-            
-            // Bind login button
-            const loginBtn = document.getElementById('loginButton');
-            if (loginBtn) {
-                loginBtn.addEventListener('click', checkAdminPassword);
-                console.log("Login button event listener attached"); // Debug log
-            } else {
-                console.error("Login button not found in DOM!");
-            }
-            
-            // Enter key support
-            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    checkAdminPassword();
-                }
-            });
+            loadOrders();
+            loadProduct();
+            loadSettings();
         });
 
-        // Firebase data loading function
-        function loadAdminData() {
-            console.log("Loading admin data..."); // Debug log
-            const database = firebase.database();
+        function openTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            // Load settings
-            database.ref('adminSettings').once('value').then((snapshot) => {
-                const settings = snapshot.val();
-                if (settings) {
-                    document.getElementById('logoUrl').value = settings.logoUrl || '';
-                    document.getElementById('storeName').value = settings.storeName || '';
-                    document.getElementById('headerText').value = settings.headerText || '';
-                    document.getElementById('themeColor').value = settings.themeColor || '#2874f0';
-                    
-                    const adminLogo = document.getElementById('adminLogo');
-                    if (adminLogo) {
-                        adminLogo.src = settings.logoUrl || '';
-                    }
-                }
-            }).catch((error) => {
-                console.error("Error loading settings:", error);
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
-
-            // Load product
-            database.ref('product').once('value').then((snapshot) => {
-                const product = snapshot.val();
-                if (product) {
-                    document.getElementById('productTitle').value = product.title || '';
-                    document.getElementById('productPrice').value = product.price || '';
-                    document.getElementById('productImageUrl').value = product.imageUrl || '';
-                    document.getElementById('productDescription').value = product.description || '';
-                }
-            }).catch((error) => {
-                console.error("Error loading product:", error);
-            });
-
-            // Load orders for dashboard
-            loadRecentOrders();
-            loadAllOrders();
-            calculateStats();
+            
+            // Show the selected tab and mark button as active
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        function loadRecentOrders() {
-            const database = firebase.database();
-            database.ref('orders').limitToLast(5).once('value').then((snapshot) => {
+        function loadOrders() {
+            database.ref('orders').on('value', (snapshot) => {
                 const orders = snapshot.val();
-                const recentOrdersTable = document.getElementById('recentOrders');
-                if (recentOrdersTable) {
-                    recentOrdersTable.innerHTML = '';
-                    
-                    if (orders) {
-                        Object.entries(orders).reverse().forEach(([orderId, order]) => {
-                            const date = new Date(order.timestamp);
-                            const row = document.createElement('tr');
-                            
-                            row.innerHTML = `
-                                <td>${orderId.substring(0, 8)}</td>
-                                <td>${order.firstName || ''} ${order.lastName || ''}</td>
-                                <td>${date.toLocaleDateString()}</td>
-                                <td>₹${order.amount || '0'}</td>
-                                <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
-                                <td>
-                                    <button class="action-btn btn-view" onclick="viewOrder('${orderId}')"><i class="fas fa-eye"></i></button>
-                                    <button class="action-btn btn-delete" onclick="deleteOrder('${orderId}')"><i class="fas fa-trash"></i></button>
-                                </td>
+                const ordersList = document.getElementById('ordersList');
+                ordersList.innerHTML = '';
+                
+                if (orders) {
+                    Object.entries(orders).reverse().forEach(([orderId, order]) => {
+                        const date = new Date(order.timestamp);
+                        const row = document.createElement('tr');
+                        
+                        // Determine available actions based on status
+                        let actionButtons = '';
+                        if (order.status === 'pending') {
+                            actionButtons = `
+                                <button class="action-btn btn-confirm" onclick="updateOrderStatus('${orderId}', 'confirmed')">Confirm</button>
+                                <button class="action-btn btn-cancel" onclick="updateOrderStatus('${orderId}', 'cancelled')">Cancel</button>
                             `;
-                            recentOrdersTable.appendChild(row);
-                        });
-                    }
+                        } else if (order.status === 'confirmed') {
+                            actionButtons = `
+                                <button class="action-btn btn-cancel" onclick="updateOrderStatus('${orderId}', 'cancelled')">Cancel</button>
+                            `;
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${orderId.substring(0, 8)}</td>
+                            <td>${order.firstName || ''} ${order.lastName || ''}</td>
+                            <td>${order.phone || ''}</td>
+                            <td>${date.toLocaleDateString()}</td>
+                            <td>₹${order.amount || '0'}</td>
+                            <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
+                            <td>
+                                ${actionButtons}
+                                <button class="action-btn btn-view" onclick="viewOrderDetails('${orderId}')">View</button>
+                                <button class="action-btn btn-delete" onclick="deleteOrder('${orderId}')">Delete</button>
+                            </td>
+                        `;
+                        ordersList.appendChild(row);
+                    });
                 }
-            }).catch((error) => {
-                console.error("Error loading recent orders:", error);
             });
         }
 
-        function loadAllOrders() {
-            const database = firebase.database();
-            database.ref('orders').once('value').then((snapshot) => {
-                const orders = snapshot.val();
-                const allOrdersTable = document.getElementById('allOrders');
-                if (allOrdersTable) {
-                    allOrdersTable.innerHTML = '';
+        function viewOrderDetails(orderId) {
+            database.ref(`orders/${orderId}`).once('value').then((snapshot) => {
+                const order = snapshot.val();
+                if (order) {
+                    const modal = document.getElementById('orderDetailsModal');
+                    const content = document.getElementById('orderDetailsContent');
                     
-                    if (orders) {
-                        Object.entries(orders).reverse().forEach(([orderId, order]) => {
-                            const date = new Date(order.timestamp);
-                            const row = document.createElement('tr');
-                            
-                            row.innerHTML = `
-                                <td>${orderId.substring(0, 8)}</td>
-                                <td>${order.firstName || ''} ${order.lastName || ''}</td>
-                                <td>${order.phone || ''}</td>
-                                <td>${date.toLocaleDateString()}</td>
-                                <td>₹${order.amount || '0'}</td>
-                                <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
-                                <td>
-                                    <button class="action-btn btn-view" onclick="viewOrder('${orderId}')"><i class="fas fa-eye"></i></button>
-                                    <button class="action-btn btn-edit" onclick="editOrder('${orderId}')"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn btn-delete" onclick="deleteOrder('${orderId}')"><i class="fas fa-trash"></i></button>
-                                </td>
-                            `;
-                            allOrdersTable.appendChild(row);
-                        });
+                    // Format the address
+                    const addressParts = [
+                        order.address,
+                        order.landmark ? `Landmark: ${order.landmark}` : '',
+                        `${order.city}, ${order.state}`,
+                        `Pincode: ${order.pincode}`
+                    ].filter(part => part !== '');
+                    
+                    const formattedAddress = addressParts.join('<br>');
+                    
+                    // Determine available actions
+                    let actionButtons = '';
+                    if (order.status === 'pending') {
+                        actionButtons = `
+                            <button class="action-btn btn-confirm" onclick="updateOrderStatus('${orderId}', 'confirmed', true)">Confirm Order</button>
+                            <button class="action-btn btn-cancel" onclick="updateOrderStatus('${orderId}', 'cancelled', true)">Cancel Order</button>
+                        `;
+                    } else if (order.status === 'confirmed') {
+                        actionButtons = `
+                            <button class="action-btn btn-cancel" onclick="updateOrderStatus('${orderId}', 'cancelled', true)">Cancel Order</button>
+                        `;
                     }
-                }
-            }).catch((error) => {
-                console.error("Error loading all orders:", error);
-            }
+                    
+                    // Populate modal content
+                    content.innerHTML = `
+                        <h3 class="section-title">Customer Information</h3>
+                        <div class="detail-row">
+                            <div class="detail-label">Name:</div>
+                            <div class="detail-value">${order.firstName || ''} ${order.lastName || ''}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Phone:</div>
+                            <div class="detail-value">${order.phone || ''}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email:</div>
+                            <div class="detail-value">${order.email || 'Not provided'}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">WhatsApp:</div>
+                            <div class="detail-value">${order.whatsapp || order.phone || 'Not provided'}</div>
+                        </div>
+                        
+                        <h3 class="section-title">Delivery Address</h3>
+                        <div class="detail-row">
+                            <div class="detail-label">Full Address:</div>
+                            <div class="detail-value">${formattedAddress}</div>
+                        </div>
+                        
+                        <h3 class="section-title">Order Information</h3>
+                        <div class="detail-row">
+                            <div class="detail-label">Order Date:</div>
+                            <div class="detail-value">${new Date(order.timestamp).toLocaleString()}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status:</div>
+                            <div class="detail-value"><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Payment Method:</div>
+                            <div class="detail-value">${order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</div>
+                        </div>
+                        
+                        <div class="detail-row" style="margin-top:30px; justify-content:center;">
+      
