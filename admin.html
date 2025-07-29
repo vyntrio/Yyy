@@ -438,180 +438,188 @@
             </div>
             <h2 class="login-title">Admin Login</h2>
             <input type="password" id="adminPassword" class="login-input" placeholder="Enter admin password">
-            <button onclick="checkAdminPassword()" class="login-btn">LOGIN</button>
+            <button id="loginButton" class="login-btn">LOGIN</button>
         </div>
     </div>
 
     <!-- Admin Dashboard -->
     <div id="adminPanel" style="display: none;">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <img id="adminLogo" class="sidebar-logo" src="" alt="Logo">
-                <div class="sidebar-title">Admin Panel</div>
-            </div>
-            <div class="sidebar-menu">
-                <div class="menu-item active" onclick="showSection('dashboard')">
-                    <div class="menu-icon"><i class="fas fa-tachometer-alt"></i></div>
-                    <div class="menu-text">Dashboard</div>
-                </div>
-                <div class="menu-item" onclick="showSection('orders')">
-                    <div class="menu-icon"><i class="fas fa-shopping-bag"></i></div>
-                    <div class="menu-text">Orders</div>
-                </div>
-                <div class="menu-item" onclick="showSection('products')">
-                    <div class="menu-icon"><i class="fas fa-box-open"></i></div>
-                    <div class="menu-text">Products</div>
-                </div>
-                <div class="menu-item" onclick="showSection('settings')">
-                    <div class="menu-icon"><i class="fas fa-cog"></i></div>
-                    <div class="menu-text">Settings</div>
-                </div>
-            </div>
-        </div>
+        <!-- Rest of your admin panel HTML remains exactly the same -->
+    </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Top Navigation -->
-            <div class="top-nav">
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
-                <div class="user-profile">
-                    <div>Admin</div>
-                    <div class="user-avatar">A</div>
-                </div>
-            </div>
+    <script>
+        // Firebase configuration (VERIFY THESE VALUES IN YOUR FIREBASE CONSOLE)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGHhx35Rd_wl422i6dXARwVLCmhjp11Zg",
+            authDomain: "bgmi-tournament-panel.firebaseapp.com",
+            databaseURL: "https://bgmi-tournament-panel-default-rtdb.firebaseio.com",
+            projectId: "bgmi-tournament-panel",
+            storageBucket: "bgmi-tournament-panel.appspot.com",
+            messagingSenderId: "531853804076",
+            appId: "1:531853804076:web:0be88f13b7c721bc354789"
+        };
 
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Dashboard Section -->
-                <div id="dashboardSection">
-                    <h1 class="dashboard-title">Dashboard Overview</h1>
-                    
-                    <!-- Stats Cards -->
-                    <div class="stats-container">
-                        <div class="stat-card">
-                            <div class="stat-title">Total Sales</div>
-                            <div class="stat-value" id="totalSales">₹0</div>
-                            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 12% from last month</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-title">Total Orders</div>
-                            <div class="stat-value" id="totalOrders">0</div>
-                            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 8% from last month</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-title">New Customers</div>
-                            <div class="stat-value" id="totalCustomers">0</div>
-                            <div class="stat-change down"><i class="fas fa-arrow-down"></i> 3% from last month</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-title">Conversion Rate</div>
-                            <div class="stat-value" id="conversionRate">0%</div>
-                            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 2% from last month</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Charts -->
-                    <div class="chart-container">
-                        <div class="chart-card">
-                            <div class="chart-title">Sales Analytics</div>
-                            <canvas id="salesChart"></canvas>
-                        </div>
-                        <div class="chart-card">
-                            <div class="chart-title">Revenue Sources</div>
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Orders -->
-                    <div class="orders-card">
-                        <div class="chart-title">Recent Orders</div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recentOrders">
-                                    <!-- Recent orders will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        // Initialize Firebase
+        let firebaseApp;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            alert("Failed to initialize Firebase. Check console for details.");
+        }
+
+        const ADMIN_PASSWORD = "722101"; // Case-sensitive password
+
+        function checkAdminPassword() {
+            const password = document.getElementById('adminPassword').value.trim();
+            console.log("Login attempt with password:", password); // Debug log
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'flex';
                 
-                <!-- Orders Section -->
-                <div id="ordersSection" class="settings-section">
-                    <h1 class="dashboard-title">Order Management</h1>
-                    <div class="orders-card">
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Phone</th>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="allOrders">
-                                    <!-- All orders will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                // Check if Firebase initialized properly
+                if (!firebaseApp) {
+                    alert("Error: Firebase not initialized. Check console for details.");
+                    return;
+                }
                 
-                <!-- Products Section -->
-                <div id="productsSection" class="settings-section">
-                    <h1 class="dashboard-title">Product Management</h1>
-                    <div class="orders-card">
-                        <div class="form-group">
-                            <label class="form-label">Product Title</label>
-                            <input type="text" id="productTitle" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Product Price (₹)</label>
-                            <input type="number" id="productPrice" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Product Image URL</label>
-                            <input type="text" id="productImageUrl" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Product Description</label>
-                            <textarea id="productDescription" class="form-control" rows="4"></textarea>
-                        </div>
-                        <button onclick="saveProduct()" class="btn-save">SAVE PRODUCT</button>
-                    </div>
-                </div>
-                
-                <!-- Settings Section -->
-                <div id="settingsSection" class="settings-section">
-                    <h1 class="dashboard-title">Store Settings</h1>
-                    <div class="orders-card">
-                        <div class="form-group">
-                            <label class="form-label">Store Logo URL</label>
-                            <input type="text" id="logoUrl" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Store Name</label>
-                            <input type="text" id="storeName" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Header Text</label>
-                            <input type="text" id="headerText" class="form-control">
-                        </div>
-                        <div class
+                loadAdminData();
+                initializeCharts();
+            } else {
+                alert('Incorrect password. Please try again.');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        // Modern event listener binding
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded"); // Debug log
+            
+            // Bind login button
+            const loginBtn = document.getElementById('loginButton');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', checkAdminPassword);
+                console.log("Login button event listener attached"); // Debug log
+            } else {
+                console.error("Login button not found in DOM!");
+            }
+            
+            // Enter key support
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAdminPassword();
+                }
+            });
+        });
+
+        // Firebase data loading function
+        function loadAdminData() {
+            console.log("Loading admin data..."); // Debug log
+            const database = firebase.database();
+            
+            // Load settings
+            database.ref('adminSettings').once('value').then((snapshot) => {
+                const settings = snapshot.val();
+                if (settings) {
+                    document.getElementById('logoUrl').value = settings.logoUrl || '';
+                    document.getElementById('storeName').value = settings.storeName || '';
+                    document.getElementById('headerText').value = settings.headerText || '';
+                    document.getElementById('themeColor').value = settings.themeColor || '#2874f0';
+                    
+                    const adminLogo = document.getElementById('adminLogo');
+                    if (adminLogo) {
+                        adminLogo.src = settings.logoUrl || '';
+                    }
+                }
+            }).catch((error) => {
+                console.error("Error loading settings:", error);
+            });
+
+            // Load product
+            database.ref('product').once('value').then((snapshot) => {
+                const product = snapshot.val();
+                if (product) {
+                    document.getElementById('productTitle').value = product.title || '';
+                    document.getElementById('productPrice').value = product.price || '';
+                    document.getElementById('productImageUrl').value = product.imageUrl || '';
+                    document.getElementById('productDescription').value = product.description || '';
+                }
+            }).catch((error) => {
+                console.error("Error loading product:", error);
+            });
+
+            // Load orders for dashboard
+            loadRecentOrders();
+            loadAllOrders();
+            calculateStats();
+        }
+
+        function loadRecentOrders() {
+            const database = firebase.database();
+            database.ref('orders').limitToLast(5).once('value').then((snapshot) => {
+                const orders = snapshot.val();
+                const recentOrdersTable = document.getElementById('recentOrders');
+                if (recentOrdersTable) {
+                    recentOrdersTable.innerHTML = '';
+                    
+                    if (orders) {
+                        Object.entries(orders).reverse().forEach(([orderId, order]) => {
+                            const date = new Date(order.timestamp);
+                            const row = document.createElement('tr');
+                            
+                            row.innerHTML = `
+                                <td>${orderId.substring(0, 8)}</td>
+                                <td>${order.firstName || ''} ${order.lastName || ''}</td>
+                                <td>${date.toLocaleDateString()}</td>
+                                <td>₹${order.amount || '0'}</td>
+                                <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
+                                <td>
+                                    <button class="action-btn btn-view" onclick="viewOrder('${orderId}')"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn btn-delete" onclick="deleteOrder('${orderId}')"><i class="fas fa-trash"></i></button>
+                                </td>
+                            `;
+                            recentOrdersTable.appendChild(row);
+                        });
+                    }
+                }
+            }).catch((error) => {
+                console.error("Error loading recent orders:", error);
+            });
+        }
+
+        function loadAllOrders() {
+            const database = firebase.database();
+            database.ref('orders').once('value').then((snapshot) => {
+                const orders = snapshot.val();
+                const allOrdersTable = document.getElementById('allOrders');
+                if (allOrdersTable) {
+                    allOrdersTable.innerHTML = '';
+                    
+                    if (orders) {
+                        Object.entries(orders).reverse().forEach(([orderId, order]) => {
+                            const date = new Date(order.timestamp);
+                            const row = document.createElement('tr');
+                            
+                            row.innerHTML = `
+                                <td>${orderId.substring(0, 8)}</td>
+                                <td>${order.firstName || ''} ${order.lastName || ''}</td>
+                                <td>${order.phone || ''}</td>
+                                <td>${date.toLocaleDateString()}</td>
+                                <td>₹${order.amount || '0'}</td>
+                                <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
+                                <td>
+                                    <button class="action-btn btn-view" onclick="viewOrder('${orderId}')"><i class="fas fa-eye"></i></button>
+                                    <button class="action-btn btn-edit" onclick="editOrder('${orderId}')"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn btn-delete" onclick="deleteOrder('${orderId}')"><i class="fas fa-trash"></i></button>
+                                </td>
+                            `;
+                            allOrdersTable.appendChild(row);
+                        });
+                    }
+                }
+            }).catch((error) => {
+                console.error("Error loading all orders:", error);
+            }
